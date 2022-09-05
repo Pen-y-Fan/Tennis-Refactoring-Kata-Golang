@@ -1,5 +1,7 @@
 # GO Starter
 
+This is the refactored version of the Go kata
+
 - Run tests :
 
 ```shell

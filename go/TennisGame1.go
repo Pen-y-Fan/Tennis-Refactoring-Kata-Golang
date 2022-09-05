@@ -1,72 +1,97 @@
 package tenniskata
 
 type tennisGame1 struct {
-	m_score1    int
-	m_score2    int
-	player1Name string
-	player2Name string
+	scorePlayer1 int
+	scorePlayer2 int
+	NamePlayer1  string
+	NamePlayer2  string
 }
 
 func TennisGame1(player1Name string, player2Name string) TennisGame {
-	game := &tennisGame1{
-		player1Name: player1Name,
-		player2Name: player2Name}
-
-	return game
+	return &tennisGame1{
+		NamePlayer1: player1Name,
+		NamePlayer2: player2Name}
 }
 
 func (game *tennisGame1) WonPoint(playerName string) {
-	if playerName == "player1" {
-		game.m_score1 += 1
+	if playerName == game.NamePlayer1 {
+		game.scorePlayer1++
 	} else {
-		game.m_score2 += 1
+		game.scorePlayer2++
 	}
 }
 
 func (game *tennisGame1) GetScore() string {
-	score := ""
-	tempScore := 0
-	if game.m_score1 == game.m_score2 {
-		switch game.m_score1 {
-		case 0:
-			score = "Love-All"
-		case 1:
-			score = "Fifteen-All"
-		case 2:
-			score = "Thirty-All"
-		default:
-			score = "Deuce"
-		}
-	} else if game.m_score1 >= 4 || game.m_score2 >= 4 {
-		minusResult := game.m_score1 - game.m_score2
-		if minusResult == 1 {
-			score = "Advantage player1"
-		} else if minusResult == -1 {
-			score = "Advantage player2"
-		} else if minusResult >= 2 {
-			score = "Win for player1"
-		} else {
-			score = "Win for player2"
-		}
-	} else {
-		for i := 1; i < 3; i++ {
-			if i == 1 {
-				tempScore = game.m_score1
-			} else {
-				score += "-"
-				tempScore = game.m_score2
-			}
-			switch tempScore {
-			case 0:
-				score += "Love"
-			case 1:
-				score += "Fifteen"
-			case 2:
-				score += "Thirty"
-			case 3:
-				score += "Forty"
-			}
-		}
+	if game.isScoreDraw() {
+		return game.getScoreDraw()
 	}
-	return score
+
+	if game.isAdvantageOrWin() {
+		return game.getAdvantageOrWin()
+	}
+
+	return game.getGameScorePlayer1() + "-" + game.getGameScorePlayer2()
+
+}
+
+func (game *tennisGame1) isScoreDraw() bool {
+	return game.scorePlayer1 == game.scorePlayer2
+}
+
+func (game *tennisGame1) getScoreDraw() string {
+	if game.scorePlayer1 < 3 {
+		return game.getGameScorePlayer1() + "-All"
+	}
+	return "Deuce"
+}
+
+func (game *tennisGame1) isAdvantageOrWin() bool {
+	return game.scorePlayer1 >= 4 || game.scorePlayer2 >= 4
+}
+
+func (game *tennisGame1) getAdvantageOrWin() string {
+	if getScoreDifference(game) == 1 {
+		return "Advantage " + getLeadingPlayerName(game)
+	}
+
+	return "Win for " + getLeadingPlayerName(game)
+}
+
+func getScoreDifference(game *tennisGame1) int {
+	return abs(game.scorePlayer1 - game.scorePlayer2)
+}
+
+func (game *tennisGame1) getGameScorePlayer1() string {
+	return getGameScore(game.scorePlayer1)
+}
+
+func (game *tennisGame1) getGameScorePlayer2() string {
+	return getGameScore(game.scorePlayer2)
+}
+
+func getGameScore(playerScore int) string {
+	switch playerScore {
+	case 0:
+		return "Love"
+	case 1:
+		return "Fifteen"
+	case 2:
+		return "Thirty"
+	}
+
+	return "Forty"
+}
+
+func getLeadingPlayerName(game *tennisGame1) string {
+	if game.scorePlayer1 > game.scorePlayer2 {
+		return game.NamePlayer1
+	}
+	return game.NamePlayer2
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
