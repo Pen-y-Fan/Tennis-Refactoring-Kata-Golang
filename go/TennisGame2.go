@@ -1,146 +1,109 @@
 package tenniskata
 
 type tennisGame2 struct {
-	P1point int
-	P2point int
+	Player1Points int
+	Player2Points int
 
-	P1res       string
-	P2res       string
-	player1Name string
-	player2Name string
+	player1Result string
+	player2Result string
+	player1Name   string
+	player2Name   string
 }
 
 func TennisGame2(player1Name string, player2Name string) TennisGame {
-	game := &tennisGame2{
-		player1Name: player1Name,
-		player2Name: player2Name}
-
-	return game
+	return &tennisGame2{player1Name: player1Name, player2Name: player2Name}
 }
 
 func (game *tennisGame2) GetScore() string {
-	score := ""
-	if game.P1point == game.P2point && game.P1point < 4 {
-		if game.P1point == 0 {
-			score = "Love"
-		}
-		if game.P1point == 1 {
-			score = "Fifteen"
-		}
-		if game.P1point == 2 {
-			score = "Thirty"
-		}
-		score += "-All"
-	}
-	if game.P1point == game.P2point && game.P1point >= 3 {
-		score = "Deuce"
+
+	game.calculateResults()
+
+	if game.isScoreDraw() && game.isScoringGame() {
+		return game.player1Result + "-All"
 	}
 
-	if game.P1point > 0 && game.P2point == 0 {
-		if game.P1point == 1 {
-			game.P1res = "Fifteen"
-		}
-		if game.P1point == 2 {
-			game.P1res = "Thirty"
-		}
-		if game.P1point == 3 {
-			game.P1res = "Forty"
-		}
-
-		game.P2res = "Love"
-		score = game.P1res + "-" + game.P2res
-	}
-	if game.P2point > 0 && game.P1point == 0 {
-		if game.P2point == 1 {
-			game.P2res = "Fifteen"
-		}
-		if game.P2point == 2 {
-			game.P2res = "Thirty"
-		}
-		if game.P2point == 3 {
-			game.P2res = "Forty"
-		}
-
-		game.P1res = "Love"
-		score = game.P1res + "-" + game.P2res
+	if game.isScoreDraw() {
+		return "Deuce"
 	}
 
-	if game.P1point > game.P2point && game.P1point < 4 {
-		if game.P1point == 2 {
-			game.P1res = "Thirty"
-		}
-		if game.P1point == 3 {
-			game.P1res = "Forty"
-		}
-		if game.P2point == 1 {
-			game.P2res = "Fifteen"
-		}
-		if game.P2point == 2 {
-			game.P2res = "Thirty"
-		}
-		score = game.P1res + "-" + game.P2res
-	}
-	if game.P2point > game.P1point && game.P2point < 4 {
-		if game.P2point == 2 {
-			game.P2res = "Thirty"
-		}
-		if game.P2point == 3 {
-			game.P2res = "Forty"
-		}
-		if game.P1point == 1 {
-			game.P1res = "Fifteen"
-		}
-		if game.P1point == 2 {
-			game.P1res = "Thirty"
-		}
-		score = game.P1res + "-" + game.P2res
+	if game.isWin() {
+		return "Win for " + game.getLeadingPlayerName()
 	}
 
-	if game.P1point > game.P2point && game.P2point >= 3 {
-		score = "Advantage player1"
+	if game.isAdvantageOrWin() {
+		return "Advantage " + game.getLeadingPlayerName()
 	}
 
-	if game.P2point > game.P1point && game.P1point >= 3 {
-		score = "Advantage player2"
-	}
-
-	if game.P1point >= 4 && game.P2point >= 0 && (game.P1point-game.P2point) >= 2 {
-		score = "Win for player1"
-	}
-	if game.P2point >= 4 && game.P1point >= 0 && (game.P2point-game.P1point) >= 2 {
-		score = "Win for player2"
-	}
-	return score
+	return game.getResults()
 }
 
-func (game *tennisGame2) SetP1Score(number int) {
-
-	for i := 0; i < number; i++ {
-		game.P1Score()
-	}
-
+func (game *tennisGame2) updatePlayer1Points() {
+	game.Player1Points++
 }
 
-func (game *tennisGame2) SetP2Score(number int) {
-
-	for i := 0; i < number; i++ {
-		game.P2Score()
-	}
-
-}
-
-func (game *tennisGame2) P1Score() {
-	game.P1point++
-}
-
-func (game *tennisGame2) P2Score() {
-	game.P2point++
+func (game *tennisGame2) updatePlayer2Points() {
+	game.Player2Points++
 }
 
 func (game *tennisGame2) WonPoint(player string) {
-	if player == "player1" {
-		game.P1Score()
-	} else {
-		game.P2Score()
+	if player == game.player1Name {
+		game.updatePlayer1Points()
+		return
 	}
+	game.updatePlayer2Points()
+}
+
+func (game *tennisGame2) isScoreDraw() bool {
+	return game.Player1Points == game.Player2Points
+}
+
+func (game *tennisGame2) isScoringGame() bool {
+	return game.Player1Points < 3
+}
+
+func (game *tennisGame2) calculatePlayer1Result() {
+	game.player1Result = getResultFor(game.Player1Points)
+}
+
+func (game *tennisGame2) calculatePlayer2Result() {
+	game.player2Result = getResultFor(game.Player2Points)
+}
+
+func (game *tennisGame2) getResults() string {
+
+	return game.player1Result + "-" + game.player2Result
+}
+func (game *tennisGame2) calculateResults() {
+	game.calculatePlayer1Result()
+	game.calculatePlayer2Result()
+}
+
+func (game *tennisGame2) getLeadingPlayerName() string {
+
+	if game.Player1Points > game.Player2Points {
+		return game.player1Name
+	}
+	return game.player2Name
+}
+
+func (game *tennisGame2) isAdvantageOrWin() bool {
+	return (game.Player1Points > game.Player2Points && game.Player2Points >= 3) || (game.Player2Points > game.Player1Points && game.Player1Points >= 3)
+}
+
+func (game *tennisGame2) isWin() bool {
+	return (game.Player1Points >= 4 && game.Player2Points >= 0 && (game.Player1Points-game.Player2Points) >= 2) || (game.Player2Points >= 4 && game.Player1Points >= 0 && (game.Player2Points-game.Player1Points) >= 2)
+}
+
+func getResultFor(playerPoints int) string {
+
+	if playerPoints == 0 {
+		return "Love"
+	}
+	if playerPoints == 1 {
+		return "Fifteen"
+	}
+	if playerPoints == 2 {
+		return "Thirty"
+	}
+	return "Forty"
 }
